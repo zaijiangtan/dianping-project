@@ -46,4 +46,10 @@ public class TokenRefreshInterceptor implements HandlerInterceptor {
         stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);
         return true;
     }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //移除用户
+        UserHolder.removeUser();
+    }
 }
