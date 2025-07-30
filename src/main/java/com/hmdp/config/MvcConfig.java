@@ -17,6 +17,10 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // token刷新拦截器，拦截所有接口，滑动刷新token过期时间
+        registry.addInterceptor(new TokenRefreshInterceptor(stringRedisTemplate))
+                .addPathPatterns("/**");
+
         registry.addInterceptor(new LoginInterceptor(stringRedisTemplate)).excludePathPatterns(
                 "/user/login",
                 "/user/code",
@@ -26,9 +30,5 @@ public class MvcConfig implements WebMvcConfigurer {
                 "/upload/**",
                 "/Voucher/**"
         );
-
-        // token刷新拦截器，拦截所有接口，滑动刷新token过期时间
-        registry.addInterceptor(new TokenRefreshInterceptor(stringRedisTemplate))
-                .addPathPatterns("/**");
     }
 }
