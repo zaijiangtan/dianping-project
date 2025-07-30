@@ -3,6 +3,7 @@ package com.hmdp.service;
 import com.hmdp.dto.Result;
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * <p>
@@ -18,4 +19,11 @@ public interface IShopService extends IService<Shop> {
      * @return
      */
     Result queryById(Long id);
+
+    /**
+     * 修改商户信息
+     * @param shop
+     * @return
+     */
+    Result updateShop(@RequestBody Shop shop);
 }
