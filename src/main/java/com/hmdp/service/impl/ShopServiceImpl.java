@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
+import static com.hmdp.utils.RedisConstants.*;
 
 /**
  * <p>
@@ -41,11 +41,17 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return Result.ok(shop);
         }
 
+        if (shopStr != null) { // 不等于null说明是空字符串-实现缓存空对象
+            return Result.fail("店铺不存在");
+        }
+
         // 3.不存在则从数据库读取
         Shop shop = getById(id);
 
         // 4.数据库不存在则返回错误信息
         if(shop == null){
+            // 4.1将空值写入redis缓存
+            stringRedisTemplate.opsForValue().set(key, "", CACHE_NULL_TTL, TimeUnit.MINUTES);
             return Result.fail("店铺不存在");
         }
 
