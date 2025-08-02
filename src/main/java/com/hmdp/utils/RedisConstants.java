@@ -1,21 +1,45 @@
 package com.hmdp.utils;
 
 public class RedisConstants {
+    /**
+     * 登陆验证码key和ttl
+     */
     public static final String LOGIN_CODE_KEY = "login:code:";
     public static final Long LOGIN_CODE_TTL = 2L;
+
+    /**
+     * 登陆用户key和ttl
+     */
     public static final String LOGIN_USER_KEY = "login:user:";
     public static final Long LOGIN_USER_TTL = 30L;
+
+    /**
+     * 获取验证码的手机号和ip的冷却期
+     */
     public static final String LOGIN_COOLDOWN_KEY = "logout:user:cooldown:";
     public static final Integer LOGIN_COOLDOWN_TTL = 60;
     public static final String LOGIN_IP_KEY = "logout:ip:limit:";
     public static final Integer LOGIN_IP_TTL = 60;
 
+    /**
+     * 商铺信息缓存的key和ttl
+     */
     public static final Long CACHE_SHOP_TTL = 30L;
     public static final String CACHE_SHOP_KEY = "cache:shop:";
+
+    /**
+     * 商铺列表信息缓存的key
+     */
     public static final String CACHE_SHOP_LIST_KEY = "cache:shop:list";
 
+    /**
+     * 缓存空对象的ttl
+     */
     public static final Long CACHE_NULL_TTL = 2L;
 
+    /**
+     * 解决缓存击穿问题的互斥锁的key和ttl
+     */
     public static final String LOCK_SHOP_KEY = "lock:shop";
     public static final Long LOCK_SHOP_TTL = 10L;
 
