@@ -21,7 +21,7 @@ public interface IUserService extends IService<User> {
     /**
      * 发送验证码并保存
      * @param phone
-     * @param session
+     * @param request
      * @return
      */
     Result sendCode(String phone, HttpServletRequest request);
@@ -31,4 +31,11 @@ public interface IUserService extends IService<User> {
      * @return
      */
     Result login(LoginFormDTO loginForm, HttpSession session);
+
+    /**
+     *根据用户id查询用户信息
+     * @param userId
+     * @return
+     */
+    Result queryUserById(Long userId);
 }
