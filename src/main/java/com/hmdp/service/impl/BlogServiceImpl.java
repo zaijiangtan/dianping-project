@@ -111,9 +111,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
         List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
         // 2.从id转换成User，再转换成UserDTO
-        String idsStr = StrUtil.join("," + ids);
+        String idsStr = StrUtil.join(",", ids);
         List<UserDTO> userDTOS = userService.query()
-                .in("id", ids).last("order by filed(id, " + idsStr + ")").list()
+                .in("id", ids).last("order by field(id, " + idsStr + ")")
+                .list()
                 .stream()
                 .map(user -> BeanUtil.copyProperties(user, UserDTO.class))
                 .collect(Collectors.toList());
