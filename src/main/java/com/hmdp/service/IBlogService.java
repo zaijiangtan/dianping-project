@@ -46,4 +46,19 @@ public interface IBlogService extends IService<Blog> {
      * @return
      */
     Result queryBlogByUserId(Integer current, Long id);
+
+    /**
+     * 保存用户发送的博文，
+     * 并推送到所有粉丝的收件箱
+     * @param blog
+     */
+    Result saveBlog(Blog blog);
+
+    /**
+     * 获取滚动分页的单页博文
+     * @param max
+     * @param offset
+     * @return
+     */
+    Result getScrollPage(Long max, Long offset);
 }
