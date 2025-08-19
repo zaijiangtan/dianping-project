@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.connection.stream.*;
@@ -89,15 +90,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                     VoucherOrder voucherOrder = BeanUtil.fillBeanWithMap(value, new VoucherOrder(), true);
 
                     // 3.2.向数据库增加修改下单信息
-                    // 3.2.1.保存订单到数据库
-                    save(voucherOrder);
-                    // 3.2.2.减库存
-                    boolean success = seckillVoucherService.update().setSql("stock = stock - 1")
-                            .eq("voucher_id", voucherOrder.getVoucherId()).gt("stock", 0)
-                            .update();
-                    if (!success) {
-                        log.error("减库存失败");
-                    }
+                    createVoucherOrder(voucherOrder);
 
                     // 3.3.向消息队列确认信息
                     stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
@@ -131,15 +124,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                     VoucherOrder voucherOrder = BeanUtil.fillBeanWithMap(value, new VoucherOrder(), true);
 
                     // 3.2.向数据库增加修改下单信息
-                    // 3.2.1.保存订单到数据库
-                    save(voucherOrder);
-                    // 3.2.2.减库存
-                    boolean success = seckillVoucherService.update().setSql("stock = stock - 1")
-                            .eq("voucher_id", voucherOrder.getVoucherId()).gt("stock", 0)
-                            .update();
-                    if (!success) {
-                        log.error("减库存失败");
-                    }
+                    createVoucherOrder(voucherOrder);
 
                     // 3.3.向消息队列确认信息
                     stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
@@ -172,4 +157,65 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         // 3.返回订单id
         return Result.ok(orderId);
     }
+
+    private void createVoucherOrder(VoucherOrder voucherOrder) {
+        Long userId = voucherOrder.getUserId();
+        Long voucherId = voucherOrder.getVoucherId();
+        // 创建锁对象
+        RLock redisLock = redissonClient.getLock("lock:order:" + userId);
+        // 尝试获取锁
+        boolean isLock = redisLock.tryLock();
+        // 判断
+        if (!isLock) {
+            // 获取锁失败，直接返回失败或者重试
+            log.error("不允许重复下单！");
+            return;
+        }
+
+        try {
+            // 5.1.查询订单
+            int count = query().eq("user_id", userId).eq("voucher_id", voucherId).count();
+            // 5.2.判断是否存在
+            if (count > 0) {
+                // 用户已经购买过了
+                log.error("不允许重复下单！");
+                return;
+            }
+
+            // 6.扣减库存
+            boolean success = seckillVoucherService.update()
+                    .setSql("stock = stock - 1") // set stock = stock - 1
+                    .eq("voucher_id", voucherId).gt("stock", 0) // where id = ? and stock > 0
+                    .update();
+            if (!success) {
+                // 扣减失败
+                log.error("库存不足！");
+                return;
+            }
+
+            // 7.创建订单
+            save(voucherOrder);
+        } finally {
+            // 释放锁
+            redisLock.unlock();
+        }
+    }
+
+    /*private BlockingQueue<VoucherOrder> orderTasks = new ArrayBlockingQueue<>(1024 * 1024);
+    private class VoucherOrderHandler implements Runnable{
+
+        @Override
+        public void run() {
+            while (true){
+                try {
+                    // 1.获取队列中的订单信息
+                    VoucherOrder voucherOrder = orderTasks.take();
+                    // 2.创建订单
+                    createVoucherOrder(voucherOrder);
+                } catch (Exception e) {
+                    log.error("处理订单异常", e);
+                }
+            }
+        }
+    }*/
 }
