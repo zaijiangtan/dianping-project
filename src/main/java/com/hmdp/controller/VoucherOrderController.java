@@ -24,7 +24,7 @@ public class VoucherOrderController {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    @RateLimiter(key = "seckill_limit:", window = 1, limit = 500)
+    //@RateLimiter(key = "seckill_limit:", window = 1, limit = 500)
     @PostMapping("seckill/{id}")
     public Result seckillVoucher(@PathVariable("id") Long voucherId) {
         return voucherOrderService.seckillVoucher(voucherId);
