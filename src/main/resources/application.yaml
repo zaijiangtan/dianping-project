@@ -19,6 +19,8 @@ spring:
         time-between-eviction-runs: 10s
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
+  kafka:
+    bootstrap-servers: 172.27.241.111:9092
 mybatis-plus:
   type-aliases-package: com.hmdp.entity # 别名扫描包
 logging:
