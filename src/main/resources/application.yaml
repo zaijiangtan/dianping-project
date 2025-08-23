@@ -21,6 +21,14 @@ spring:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
   kafka:
     bootstrap-servers: 172.27.241.111:9092
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.hmdp.entity
+    listener:
+      ack-mode: manual_immediate   # 手动 ack
 mybatis-plus:
   type-aliases-package: com.hmdp.entity # 别名扫描包
 logging:
