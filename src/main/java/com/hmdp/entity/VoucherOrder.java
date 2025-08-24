@@ -27,7 +27,7 @@ public class VoucherOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 主键-订单id
      */
     @TableId(value = "id", type = IdType.INPUT)
     private Long id;

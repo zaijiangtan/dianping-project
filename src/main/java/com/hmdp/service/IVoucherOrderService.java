@@ -24,5 +24,11 @@ public interface IVoucherOrderService extends IService<VoucherOrder> {
 
     void rollbackVoucherOrder(VoucherOrder voucherOrder);
 
+    /**
+     * 更新已支付订单的状态
+     * @param order
+     */
+    boolean updateStatus(VoucherOrder order);
+
     // Result createSeckillVoucher(Long voucherId);
 }

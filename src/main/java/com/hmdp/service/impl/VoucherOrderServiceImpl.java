@@ -7,6 +7,7 @@ import com.hmdp.mapper.VoucherOrderMapper;
 import com.hmdp.service.ISeckillVoucherService;
 import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.utils.OrderStatus;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ import java.util.concurrent.*;
 @Service
 @Slf4j
 public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, VoucherOrder> implements IVoucherOrderService {
+
+    @Resource
+    private VoucherOrderMapper voucherOrderMapper;
 
     @Resource
     private ISeckillVoucherService seckillVoucherService;
@@ -161,6 +165,16 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                 voucherId.toString(), userId.toString()
         );
         log.info("回滚执行完成");
+    }
+
+    @Override
+    public boolean updateStatus(VoucherOrder order) {
+        int result = voucherOrderMapper.updateOrderStatus(order.getId(),
+                OrderStatus.UNPAID.getCode(), OrderStatus.PAID.getCode());
+        if (result != 1) {
+            return false;
+        }
+        return true;
     }
 
     // 阻塞队列
